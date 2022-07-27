@@ -1,0 +1,164 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "todo app api",
+    "description": "todo app api provides functionlties to add, view, update, and delete your todos.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://virtserver.swaggerhub.com/ahmeducf10/todo_api/1.0.0",
+      "description": "SwaggerHub API Auto Mocking"
+    }
+  ],
+  "paths": {
+    "/todos": {
+      "get": {
+        "summary": "get the list of all todos",
+        "operationId": "getAllTodos",
+        "responses": {
+          "200": {
+            "description": "the request received and understood and processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/todoItem"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "adds a todo item",
+        "operationId": "addTodoItem",
+        "requestBody": {
+          "description": "todo item to add",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/todoItem"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "request successed and item created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/todoItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid input, object invalid"
+          },
+          "409": {
+            "description": "an existing item already exists"
+          }
+        }
+      }
+    },
+    "/todos/{id}": {
+      "get": {
+        "summary": "get a todo item by id",
+        "operationId": "getTodoItemById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "todo item ID",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "the request received and understood and processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/todoItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid input, object invalid"
+          },
+          "404": {
+            "description": "the requested item was not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete a todo item by id",
+        "operationId": "deleteTodoItemById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "todo item ID",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "the request received and understood and item deleted"
+          },
+          "400": {
+            "description": "did not understand the request due to bad syntax"
+          },
+          "404": {
+            "description": "the requested item was not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "todoItem": {
+        "required": [
+          "completed",
+          "id",
+          "itemTitle"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "example": 1
+          },
+          "itemTitle": {
+            "type": "string",
+            "example": "clean the room"
+          },
+          "completed": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      }
+    }
+  }
+}
