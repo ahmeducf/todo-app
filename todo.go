@@ -17,7 +17,7 @@ type Todo struct {
 }
 
 const (
-	dbFilePath = "todo.db"
+	dbFilePath 	  = "todo.db"
 	listenPort    = ":8080"
 )
 
@@ -37,9 +37,7 @@ func getAllTodos(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(data)
+	writeHttpResponse(w, http.StatusOK, data)
 }
 
 func addTodoItem(w http.ResponseWriter, req *http.Request) {
@@ -78,17 +76,69 @@ func getTodoItemById(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write(data)
+		writeHttpResponse(w, http.StatusOK, data)
 	}
+}
+
+func deleteTodoItemById(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+
+	var item Todo
+	err := db.First(&item, vars["id"]).Error
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	} else {
+		if err := db.Delete(item).Error; err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
+func updateTodoItemById(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+
+	var item Todo
+	err := db.First(&item, vars["id"]).Error
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	} else {
+		var newItem Todo
+		json.NewDecoder(req.Body).Decode(&newItem)
+
+		item.Title = newItem.Title
+		item.Completed = newItem.Completed
+
+		if err := db.Save(item).Error; err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		
+		data, err := json.Marshal(item)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		writeHttpResponse(w, http.StatusCreated, data)
+	}
+}
+
+func writeHttpResponse(w http.ResponseWriter, statusCode int, data []byte) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	w.Write(data)
 }
 
 func RegisterTodoRoutes() {
 	router.HandleFunc("/todos", getAllTodos).Methods("GET")
 	router.HandleFunc("/todos", addTodoItem).Methods("POST")
 	router.HandleFunc("/todos/{id}", getTodoItemById).Methods("GET")
-	
+	router.HandleFunc("/todos/{id}", deleteTodoItemById).Methods("DELETE")
+	router.HandleFunc("/todos/{id}", updateTodoItemById).Methods("PATCH")
 }
 
 func main() {

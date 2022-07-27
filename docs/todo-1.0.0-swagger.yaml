@@ -21,6 +21,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/todoItem'
+        "500":
+          description: Internal Server Error
     post:
       summary: adds a todo item
       operationId: addTodoItem
@@ -65,6 +67,8 @@ paths:
                 $ref: '#/components/schemas/todoItem'
         "404":
           description: the requested item was not found
+        "500":
+          description: Internal Server Error
     delete:
       summary: delete a todo item by id
       operationId: deleteTodoItemById
@@ -83,6 +87,28 @@ paths:
           description: the request received and understood and item deleted
         "404":
           description: the requested item was not found
+        "500":
+          description: Internal Server Error
+    patch:
+      summary: Update an existing todo item by id
+      operationId: updateTodoItemById
+      parameters:
+      - name: id
+        in: path
+        description: ID of todo item
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "201":
+          description: request successed and item updated
+        "404":
+          description: Not found
+        "500":
+          description: Internal Server Error
 components:
   schemas:
     todoItem:

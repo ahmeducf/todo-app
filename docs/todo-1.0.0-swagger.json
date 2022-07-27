@@ -29,6 +29,9 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       },
@@ -95,11 +98,11 @@
               }
             }
           },
-          "400": {
-            "description": "invalid input, object invalid"
-          },
           "404": {
             "description": "the requested item was not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       },
@@ -124,11 +127,40 @@
           "200": {
             "description": "the request received and understood and item deleted"
           },
-          "400": {
-            "description": "did not understand the request due to bad syntax"
-          },
           "404": {
             "description": "the requested item was not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update an existing todo item by id",
+        "operationId": "updateTodoItemById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of todo item",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "request successed and item updated"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
