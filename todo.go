@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
 	"gorm.io/driver/sqlite"
@@ -17,18 +16,30 @@ type Todo struct {
 	Completed bool	`json:"completed"`
 }
 
+const (
+	dbFilePath = "todo.db"
+	listenPort    = ":8080"
+)
+
 var db *gorm.DB
-var db_FILE = os.Getenv("DB_FILE")
 var router = mux.NewRouter()
 
 func getAllTodos(w http.ResponseWriter, req *http.Request) {
-	w.Header().Add("Content-Type", "application/json")
-
 	var todos []Todo
-	db.Find(&todos)
+	if err := db.Find(&todos).Error ;err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
+	data, err := json.Marshal(todos)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(todos)
+	w.Write(data)
 }
 
 func addTodoItem(w http.ResponseWriter, req *http.Request) {
@@ -36,34 +47,55 @@ func addTodoItem(w http.ResponseWriter, req *http.Request) {
 
 	var todoItem Todo
 	if err := json.NewDecoder(req.Body).Decode(&todoItem); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
-	if db.First(&Todo{}, todoItem.ID).Error == nil {
-		w.WriteHeader(http.StatusConflict)
-	} else {
-		db.Create(&todoItem)
-		w.WriteHeader(http.StatusOK)
+	if result := db.First(&Todo{}, todoItem.ID); result.Error == nil {
+		http.Error(w, result.Error.Error(), http.StatusConflict)
+		return 
+
+	} else if result := db.Create(&todoItem); result.Error != nil {
+		http.Error(w, result.Error.Error(), http.StatusConflict)
+		return 
 	}
+
+	w.WriteHeader(http.StatusCreated)
 }
 
 func getTodoItemById(w http.ResponseWriter, req *http.Request) {
-	w.Header().Add("Content-Type", "application/json")
-
+	vars := mux.Vars(req)
 	
+	var item Todo
+	err := db.First(&item, vars["id"]).Error
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	} else {
+		data, err := json.Marshal(item)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(data)
+	}
 }
 
 func RegisterTodoRoutes() {
 	router.HandleFunc("/todos", getAllTodos).Methods("GET")
 	router.HandleFunc("/todos", addTodoItem).Methods("POST")
-	router.HandleFunc("/todos/{id}", getTodoItemById)
+	router.HandleFunc("/todos/{id}", getTodoItemById).Methods("GET")
+	
 }
 
 func main() {
-	db, _ = gorm.Open(sqlite.Open(db_FILE), &gorm.Config{})
+	db, _ = gorm.Open(sqlite.Open(dbFilePath), &gorm.Config{})
 	db.AutoMigrate(&Todo{})
 
 
 	RegisterTodoRoutes()
-	http.ListenAndServe(":8080", router)
+	http.ListenAndServe(listenPort, router)
 }

@@ -63,8 +63,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/todoItem'
-        "400":
-          description: invalid input, object invalid
         "404":
           description: the requested item was not found
     delete:
@@ -83,8 +81,6 @@ paths:
       responses:
         "200":
           description: the request received and understood and item deleted
-        "400":
-          description: did not understand the request due to bad syntax
         "404":
           description: the requested item was not found
 components:
