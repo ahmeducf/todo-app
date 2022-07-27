@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"path"
 
 	"github.com/gorilla/mux"
 	"gorm.io/driver/sqlite"
@@ -16,8 +17,8 @@ type Todo struct {
 	Completed bool	`json:"completed"`
 }
 
-const (
-	dbFilePath 	  = "todo.db"
+var (
+	dbFilePath 	  = path.Join("database", "todo.db")
 	listenPort    = ":8080"
 )
 
@@ -50,7 +51,7 @@ func addTodoItem(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if result := db.First(&Todo{}, todoItem.ID); result.Error == nil {
-		http.Error(w, result.Error.Error(), http.StatusConflict)
+		w.WriteHeader(http.StatusConflict)
 		return 
 
 	} else if result := db.Create(&todoItem); result.Error != nil {
