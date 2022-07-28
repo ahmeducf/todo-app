@@ -21,6 +21,7 @@ type TodoItem struct {
 const (
 	listenPort    = ":8080"
 	badRequest 	  = "Request is not valid\n"
+	JsonIndent = "    "
 )
 
 type TodoServer struct {
@@ -51,7 +52,7 @@ func (app *TodoServer) GetAllTodos(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	
-	data, err := json.Marshal(todos)
+	data, err := json.MarshalIndent(todos, "", JsonIndent)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -60,13 +61,20 @@ func (app *TodoServer) GetAllTodos(w http.ResponseWriter, req *http.Request) {
 	writeHttpResponse(w, http.StatusOK, data)
 }
 
+func isBadRequest(item TodoItem) bool{
+	if item.ID == 0 || len(item.Title) == 0 {
+		return true
+	}
+
+	return false
+}
 func (app *TodoServer) AddTodoItem(w http.ResponseWriter, req *http.Request) {
 	var todoItem TodoItem
 	if err := json.NewDecoder(req.Body).Decode(&todoItem); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	if todoItem.ID == 0 || len(todoItem.Title) == 0 {
+	if isBadRequest(todoItem) {
 		http.Error(w, badRequest, http.StatusBadRequest)
 		return
 	}
@@ -80,7 +88,7 @@ func (app *TodoServer) AddTodoItem(w http.ResponseWriter, req *http.Request) {
 		return 
 	}
 
-	data, err := json.Marshal(todoItem)
+	data, err := json.MarshalIndent(todoItem, "", JsonIndent)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -112,7 +120,7 @@ func (app *TodoServer) UpdateTodoItem(w http.ResponseWriter, req *http.Request) 
 			return
 		}
 		
-		data, err := json.Marshal(item)
+		data, err := json.MarshalIndent(item, "", JsonIndent)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -138,7 +146,7 @@ func (app *TodoServer) GetTodoItemById(w http.ResponseWriter, req *http.Request)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	} else {
-		data, err := json.Marshal(item)
+		data, err := json.MarshalIndent(item, "", JsonIndent)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
