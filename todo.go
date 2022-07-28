@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"path"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"gorm.io/driver/sqlite"
@@ -124,14 +123,9 @@ func (app *TodoServer) UpdateTodoItem(w http.ResponseWriter, req *http.Request) 
 }
 
 func (app *TodoServer) GetTodoItemById(w http.ResponseWriter, req *http.Request) {
-	var id int
 	var err error
 	vars := mux.Vars(req)
-
-	if id, err = strconv.Atoi(vars["id"]); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	id := vars["id"]
 
 	var item TodoItem
 	err = app.db.First(&item, id).Error
@@ -150,13 +144,9 @@ func (app *TodoServer) GetTodoItemById(w http.ResponseWriter, req *http.Request)
 }
 
 func (app *TodoServer) DeleteTodoItemById(w http.ResponseWriter, req *http.Request) {
-	var id int
 	var err error
 	vars := mux.Vars(req)
-	if id, err = strconv.Atoi(vars["id"]); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	id := vars["id"]
 
 	var item TodoItem
 	err = app.db.First(&item, id).Error

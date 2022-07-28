@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -184,6 +185,70 @@ func TestUpdateTodoItem(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		app.UpdateTodoItem(response, request)
+
+		assertStatusCode(t, response.Code, http.StatusNotFound)
+	})
+}
+
+func TestGetTodoItemById(t *testing.T) {
+	t.Run("get todo item by id with StatusOK", func(t *testing.T) {
+		app := createTestingDb(int(time.Now().UnixMilli()))
+		defer removeDatabase(app)
+
+		app.db.Create(&TodoItem{ID: 1, Title: "clean the room", Completed: false})
+		app.db.Create(&TodoItem{ID: 10, Title: "clean the room", Completed: false})
+		request := httptest.NewRequest(http.MethodGet, "localhost:8080/todos/1", nil)
+		response := httptest.NewRecorder()
+
+		app.GetTodoItemById(response, request)
+		var got TodoItem
+		json.NewDecoder(response.Body).Decode(&got)
+		want := TodoItem{ID: 1, Title: "clean the room", Completed: false}
+
+		assertStatusCode(t, response.Code, http.StatusOK)
+		assertEqualTodoItems(t, got, want)
+	})
+
+	t.Run("get non existing todo item by id with StatusNotFound", func(t *testing.T) {
+		app := createTestingDb(int(time.Now().UnixMilli()))
+		defer removeDatabase(app)
+
+
+		request := httptest.NewRequest(http.MethodGet, "localhost:8080/todos/10", nil)
+		response := httptest.NewRecorder()
+		
+		app.GetTodoItemById(response, request)
+		var got TodoItem
+		json.NewDecoder(response.Body).Decode(&got)
+
+		assertStatusCode(t, response.Code, http.StatusNotFound)
+	})
+}
+
+func TestDeleteTodoItemById(t *testing.T) {
+	t.Run("delete todo item with code StatusOK", func(t *testing.T) {
+		app := createTestingDb(int(time.Now().UnixMilli()))
+		defer removeDatabase(app)
+
+		app.db.Create(&TodoItem{ID: 2, Title: "clean room", Completed: false})
+
+		request := httptest.NewRequest(http.MethodDelete, "localhost:8080/todos/2", bytes.NewBuffer([]byte(newItemJson)))
+		response := httptest.NewRecorder()
+		fmt.Println(response.Body.String())
+		app.DeleteTodoItemById(response, request)
+
+		assertStatusCode(t, response.Code, http.StatusOK)
+	})
+
+	t.Run("delete todo item with code StatusNotFound", func(t *testing.T) {
+		app := createTestingDb(int(time.Now().UnixMilli()))
+		defer removeDatabase(app)
+
+
+		request := httptest.NewRequest(http.MethodDelete, "localhost:8080/todos/2", bytes.NewBuffer([]byte(newItemJson)))
+		response := httptest.NewRecorder()
+		fmt.Println(response.Body.String())
+		app.DeleteTodoItemById(response, request)
 
 		assertStatusCode(t, response.Code, http.StatusNotFound)
 	})
