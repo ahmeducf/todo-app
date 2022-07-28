@@ -15,7 +15,7 @@
     "/todos": {
       "get": {
         "summary": "get the list of all todos",
-        "operationId": "getAllTodos",
+        "operationId": "GetAllTodos",
         "responses": {
           "200": {
             "description": "the request received and understood and processed",
@@ -37,7 +37,7 @@
       },
       "post": {
         "summary": "adds a todo item",
-        "operationId": "addTodoItem",
+        "operationId": "AddTodoItem",
         "requestBody": {
           "description": "todo item to add",
           "content": {
@@ -66,12 +66,40 @@
             "description": "an existing item already exists"
           }
         }
+      },
+      "patch": {
+        "summary": "Update an existing todo item by id",
+        "operationId": "UpdateTodoItemById",
+        "requestBody": {
+          "description": "todo item to add",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/todoItem"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "request successed and item updated"
+          },
+          "400": {
+            "description": "invalid input, object invalid"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
       }
     },
     "/todos/{id}": {
       "get": {
         "summary": "get a todo item by id",
-        "operationId": "getTodoItemById",
+        "operationId": "GetTodoItemById",
         "parameters": [
           {
             "name": "id",
@@ -98,6 +126,9 @@
               }
             }
           },
+          "400": {
+            "description": "invalid input, object invalid"
+          },
           "404": {
             "description": "the requested item was not found"
           },
@@ -107,7 +138,7 @@
         }
       },
       "delete": {
-        "summary": "delete a todo item by id",
+        "summary": "Delete a todo item by id",
         "operationId": "deleteTodoItemById",
         "parameters": [
           {
@@ -127,37 +158,11 @@
           "200": {
             "description": "the request received and understood and item deleted"
           },
+          "400": {
+            "description": "invalid input, object invalid"
+          },
           "404": {
             "description": "the requested item was not found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      },
-      "patch": {
-        "summary": "Update an existing todo item by id",
-        "operationId": "updateTodoItemById",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of todo item",
-            "required": true,
-            "style": "simple",
-            "explode": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "request successed and item updated"
-          },
-          "404": {
-            "description": "Not found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -177,6 +182,7 @@
         "type": "object",
         "properties": {
           "id": {
+            "minimum": 1,
             "type": "integer",
             "format": "int64",
             "example": 1
