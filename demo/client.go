@@ -29,9 +29,9 @@ func main() {
     fmt.Println("*********Add new tasks*********")
     for i := 1; i <= 10; i++ {
         body := fmt.Sprintf(Req, i, i, "false")
-        serverAddress := fmt.Sprintf(ServerAddress, "/todos")
-        req := buildRequest("POST", serverAddress, []byte(body))
-        client.Do(req)
+        req := buildRequest("POST", "/todos", []byte(body))
+        res, _ := client.Do(req)
+        printResponse(res)
     }
 
     // Get all tasks
