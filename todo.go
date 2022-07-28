@@ -61,13 +61,6 @@ func (app *TodoServer) GetAllTodos(w http.ResponseWriter, req *http.Request) {
 	writeHttpResponse(w, http.StatusOK, data)
 }
 
-func isBadRequest(item TodoItem) bool{
-	if item.ID == 0 || len(item.Title) == 0 {
-		return true
-	}
-
-	return false
-}
 func (app *TodoServer) AddTodoItem(w http.ResponseWriter, req *http.Request) {
 	var todoItem TodoItem
 	if err := json.NewDecoder(req.Body).Decode(&todoItem); err != nil {
@@ -191,6 +184,14 @@ func (app *TodoServer)registerTodoRoutes(router *mux.Router) {
 	router.HandleFunc("/todos", app.UpdateTodoItem).Methods("PATCH")
 	router.HandleFunc("/todos/{id}", app.GetTodoItemById).Methods("GET")
 	router.HandleFunc("/todos/{id}", app.DeleteTodoItemById).Methods("DELETE")
+}
+
+func isBadRequest(item TodoItem) bool{
+	if item.ID == 0 || len(item.Title) == 0 {
+		return true
+	}
+
+	return false
 }
 
 func main() {

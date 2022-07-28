@@ -29,7 +29,7 @@ func main() {
     fmt.Println("*********Add new tasks*********")
     for i := 1; i <= 10; i++ {
         body := fmt.Sprintf(Req, i, i, "false")
-        req := buildRequest("POST", "/todos", []byte(body))
+        req := buildRequest(MethodPost, "/todos", []byte(body))
         res, _ := client.Do(req)
         printResponse(res)
     }
