@@ -2,7 +2,7 @@
 openapi: 3.0.0
 info:
   title: todo app api
-  description: todo app api provides functionlties to add, view, update, and delete your todos.
+  description: todo app api provides functionalities to add, view, update, and delete your todos.
   version: 1.0.0
 servers:
 - url: https://virtserver.swaggerhub.com/ahmeducf10/todo_api/1.0.0
