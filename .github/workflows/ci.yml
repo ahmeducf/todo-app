@@ -29,6 +29,7 @@ jobs:
       with:
         image: ahmedsalahucf/todo-app
         registry: docker.io
+        directory: backend
         dockerfile: backend/Dockerfile
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
