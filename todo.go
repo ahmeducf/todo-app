@@ -79,7 +79,6 @@ func (app *TodoServer) AddTodoItem(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, result.Error.Error(), http.StatusInternalServerError)
 		return 
 	}
-
 	data, err := json.MarshalIndent(todoItem, "", JsonIndent)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -158,22 +157,24 @@ func (app *TodoServer) DeleteTodoItemById(w http.ResponseWriter, req *http.Reque
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
 	}
 }
 
-func writeHttpResponse(w http.ResponseWriter, statusCode int, data []byte) {
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	w.Write(data)
+func OptionMessage(w http.ResponseWriter, req *http.Request) {
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+	w.Header().Add("Access-Control-Allow-Methods", "*")
+	w.Header().Add("Access-Control-Allow-Headers", "*")
 }
 
-func (app *TodoServer)registerTodoRoutes(router *mux.Router) {
-	router.HandleFunc("/todos", app.GetAllTodos).Methods("GET")
-	router.HandleFunc("/todos", app.AddTodoItem).Methods("POST")
-	router.HandleFunc("/todos", app.UpdateTodoItem).Methods("PATCH")
-	router.HandleFunc("/todos/{id}", app.GetTodoItemById).Methods("GET")
-	router.HandleFunc("/todos/{id}", app.DeleteTodoItemById).Methods("DELETE")
+func writeHttpResponse(w http.ResponseWriter, statusCode int, data []byte) {
+	w.Header().Add("Content-Type", "application/json")
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+	w.Header().Add("Access-Control-Allow-Methods", "*")
+	w.Header().Add("Access-Control-Allow-Headers", "*")
+	w.WriteHeader(statusCode)
+	w.Write(data)
 }
 
 func isBadRequest(item TodoItem) bool{
@@ -182,6 +183,23 @@ func isBadRequest(item TodoItem) bool{
 	}
 
 	return false
+}
+
+func (app *TodoServer)registerTodoRoutes(router *mux.Router) {
+	router.HandleFunc("/todos", app.GetAllTodos).Methods(http.MethodGet)
+	router.HandleFunc("/todos", OptionMessage).Methods(http.MethodOptions)
+
+	router.HandleFunc("/todos", app.AddTodoItem).Methods(http.MethodPost)
+	router.HandleFunc("/todos", OptionMessage).Methods(http.MethodOptions)
+
+	router.HandleFunc("/todos", app.UpdateTodoItem).Methods(http.MethodPatch)
+	router.HandleFunc("/todos", OptionMessage).Methods(http.MethodOptions)
+
+	router.HandleFunc("/todos/{id}", app.GetTodoItemById).Methods(http.MethodGet)
+	router.HandleFunc("/todos/{id}", OptionMessage).Methods(http.MethodOptions)
+
+	router.HandleFunc("/todos/{id}", app.DeleteTodoItemById).Methods(http.MethodDelete)
+	router.HandleFunc("/todos/{id}", OptionMessage).Methods(http.MethodOptions)
 }
 
 func main() {
