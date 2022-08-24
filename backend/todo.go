@@ -2,10 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"os"
 	"path"
+	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -20,7 +24,7 @@ type TodoItem struct {
 const (
 	listenPort    = ":8080"
 	badRequest 	  = "Request is not valid\n"
-	JsonIndent = "    "
+	JsonIndent 	  = "    "
 )
 
 type TodoServer struct {
@@ -66,6 +70,9 @@ func (app *TodoServer) AddTodoItem(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	todoItem.ID = uint(time.Now().UnixMilli())
+	
 	if isBadRequest(todoItem) {
 		http.Error(w, badRequest, http.StatusBadRequest)
 		return
@@ -157,49 +164,32 @@ func (app *TodoServer) DeleteTodoItemById(w http.ResponseWriter, req *http.Reque
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.WriteHeader(http.StatusOK)
 	}
 }
 
-func OptionMessage(w http.ResponseWriter, req *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", "*")
-	w.Header().Add("Access-Control-Allow-Methods", "*")
-	w.Header().Add("Access-Control-Allow-Headers", "*")
-}
-
 func writeHttpResponse(w http.ResponseWriter, statusCode int, data []byte) {
-	w.Header().Add("Content-Type", "application/json")
-	w.Header().Add("Access-Control-Allow-Origin", "*")
-	w.Header().Add("Access-Control-Allow-Methods", "*")
-	w.Header().Add("Access-Control-Allow-Headers", "*")
 	w.WriteHeader(statusCode)
 	w.Write(data)
 }
 
 func isBadRequest(item TodoItem) bool{
-	if item.ID == 0 || len(item.Title) == 0 {
-		return true
-	}
 
-	return false
+	return len(item.Title) == 0
+}
+
+func middleware(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h.ServeHTTP(w, r)
+	})
 }
 
 func (app *TodoServer)registerTodoRoutes(router *mux.Router) {
 	router.HandleFunc("/todos", app.GetAllTodos).Methods(http.MethodGet)
-	router.HandleFunc("/todos", OptionMessage).Methods(http.MethodOptions)
-
 	router.HandleFunc("/todos", app.AddTodoItem).Methods(http.MethodPost)
-	router.HandleFunc("/todos", OptionMessage).Methods(http.MethodOptions)
-
 	router.HandleFunc("/todos", app.UpdateTodoItem).Methods(http.MethodPatch)
-	router.HandleFunc("/todos", OptionMessage).Methods(http.MethodOptions)
-
 	router.HandleFunc("/todos/{id}", app.GetTodoItemById).Methods(http.MethodGet)
-	router.HandleFunc("/todos/{id}", OptionMessage).Methods(http.MethodOptions)
-
 	router.HandleFunc("/todos/{id}", app.DeleteTodoItemById).Methods(http.MethodDelete)
-	router.HandleFunc("/todos/{id}", OptionMessage).Methods(http.MethodOptions)
 }
 
 func main() {
@@ -207,10 +197,19 @@ func main() {
 	app.dbFilePath = path.Join("database", "todo.db")
 	err := app.initDb()
 	if err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "%s", err.Error())
+        os.Exit(1)
 	}
 
+	c := cors.AllowAll()
 	var router = mux.NewRouter()
+	
+	server := &http.Server {
+		Addr: listenPort,
+		Handler: c.Handler(router),
+	}
+
+	router.Use()
 	app.registerTodoRoutes(router)
-	http.ListenAndServe(listenPort, router)
+	server.ListenAndServe()
 }

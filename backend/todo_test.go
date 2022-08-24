@@ -72,36 +72,6 @@ func TestGetAllTodos(t *testing.T) {
 
 
 func TestAddTodoItem(t *testing.T) {
-	t.Run("add new todo item with code StatusCreated", func(t *testing.T) {
-		app := createTestingDb(int(time.Now().UnixMilli()))
-		defer removeDatabase(app)
-
-		request := httptest.NewRequest(http.MethodPost, "localhost:8080/todos", bytes.NewBuffer([]byte(newItemJson)))
-		response := httptest.NewRecorder()
-
-		app.AddTodoItem(response, request)
-		var got TodoItem
-		json.NewDecoder(response.Body).Decode(&got)
-		want := TodoItem{ID: 2, Title: "clean room", Completed: false}
-
-		assertStatusCode(t, response.Code, http.StatusCreated)
-		assertEqualTodoItems(t, got, want)
-	})
-
-	t.Run("add existing todo item with StatusConflict", func(t *testing.T) {
-		app := createTestingDb(int(time.Now().UnixMilli()))
-		defer removeDatabase(app)
-
-		app.db.Create(&TodoItem{ID: 2, Title: "clean room", Completed: false})
-
-		request := httptest.NewRequest(http.MethodPost, "localhost:8080/todos", bytes.NewBuffer([]byte(newItemJson)))
-		response := httptest.NewRecorder()
-
-		app.AddTodoItem(response, request)
-
-		assertStatusCode(t, response.Code, http.StatusConflict)
-	})
-
 	t.Run("invalid json syntax with StatusBadRequest", func(t *testing.T) {
 		app := createTestingDb(int(time.Now().UnixMilli()))
 		defer removeDatabase(app)
