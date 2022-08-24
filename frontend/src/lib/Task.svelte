@@ -3,7 +3,7 @@
   export let task: {id:number, title: string, completed: boolean};
   export let handleDelete:Function;
   
-  const URL:string = "http://localhost:8010/todos";
+  const URL:string = "http://localhost:8080/todos";
 
   async function handleDone(){
     task.completed = !task.completed
@@ -12,11 +12,9 @@
     
     const item = {...task, completed: task.completed}
     console.log(item)
-    console.log(URL + "/" + task.id)
     
 
-    await fetch(
-      URL + "/" + task.id,
+    await fetch(URL,
       {
         method: "PATCH",
         headers: {'Content-Type': 'application/json'},

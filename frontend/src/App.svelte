@@ -9,8 +9,6 @@
 
     let newTask:string = ""
 
-    let nextTaskId:number = 10
-
     async function getAllTasks() {
         fetch(URL)
         .then(response => response.json())
@@ -24,7 +22,6 @@
 
     async function handleSubmit(e: any){
         const item = {
-            id: nextTaskId,
             title: newTask,
             completed: false
         }
@@ -34,13 +31,12 @@
         await fetch(URL, 
             {
                 method: "POST",
-                body: JSON.stringify(item),
                 headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(item),
             }
         )
 
         newTask = ""
-        nextTaskId += 1
 
         getAllTasks()
     }
