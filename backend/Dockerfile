@@ -1,7 +1,7 @@
 # Build stage
 FROM golang AS builder
 
-WORKDIR /todo-app
+WORKDIR /todo-app/backend
 
 COPY . .
 
@@ -12,9 +12,9 @@ RUN go build -o todo todo.go
 # Run stage
 FROM ubuntu
 
-WORKDIR /todo
+WORKDIR /todo-app/backend
 
-COPY --from=builder /todo-app/todo .
+COPY --from=builder /todo-app/backend/todo .
 RUN mkdir database
 
 VOLUME ["/var/db"]
