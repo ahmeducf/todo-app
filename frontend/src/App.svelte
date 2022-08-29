@@ -63,9 +63,9 @@
 
     <div class="tasks">
 
-    <form on:submit|preventDefault={handleSubmit}>
+    <form name='form' on:submit|preventDefault={handleSubmit}>
 
-        <input bind:value={newTask} class="enter" type="text" placeholder="What to be done?" />
+        <input bind:value={newTask} name="task" class="enter" type="text" placeholder="What to be done?" />
 
     </form>
 
