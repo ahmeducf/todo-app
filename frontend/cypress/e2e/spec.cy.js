@@ -1,6 +1,6 @@
 describe('Todo App Test', () => {
   it('Visits todo app', () => {
-    cy.visit('http://127.0.0.1:5173')
+    cy.visit('http://127.0.0.1:5050')
 
     cy.get('input[name="task"]').type('play').should('have.value','play')
     cy.get('form').submit()
