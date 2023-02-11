@@ -1,0 +1,202 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "todo app api",
+    "description": "todo app api provides functionlties to add, view, update, and delete your todos.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://virtserver.swaggerhub.com/ahmeducf10/todo_api/1.0.0",
+      "description": "SwaggerHub API Auto Mocking"
+    }
+  ],
+  "paths": {
+    "/todos": {
+      "get": {
+        "summary": "get the list of all todos",
+        "operationId": "GetAllTodos",
+        "responses": {
+          "200": {
+            "description": "the request received and understood and processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/todoItem"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "summary": "adds a todo item",
+        "operationId": "AddTodoItem",
+        "requestBody": {
+          "description": "todo item to add",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/todoItem"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "request successed and item created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/todoItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid input, object invalid"
+          },
+          "409": {
+            "description": "an existing item already exists"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update an existing todo item by id",
+        "operationId": "UpdateTodoItemById",
+        "requestBody": {
+          "description": "todo item to add",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/todoItem"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "request successed and item updated"
+          },
+          "400": {
+            "description": "invalid input, object invalid"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/todos/{id}": {
+      "get": {
+        "summary": "get a todo item by id",
+        "operationId": "GetTodoItemById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "todo item ID",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "the request received and understood and processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/todoItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid input, object invalid"
+          },
+          "404": {
+            "description": "the requested item was not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a todo item by id",
+        "operationId": "deleteTodoItemById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "todo item ID",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "the request received and understood and item deleted"
+          },
+          "400": {
+            "description": "invalid input, object invalid"
+          },
+          "404": {
+            "description": "the requested item was not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "todoItem": {
+        "required": [
+          "completed",
+          "id",
+          "itemTitle"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int64",
+            "example": 1
+          },
+          "itemTitle": {
+            "type": "string",
+            "example": "clean the room"
+          },
+          "completed": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      }
+    }
+  }
+}
